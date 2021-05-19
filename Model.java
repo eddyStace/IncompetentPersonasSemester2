@@ -3,9 +3,10 @@ import java.util.ArrayList;
 public class Model{ 
 	private ArrayList<Teacher> teachers;
 	private ArrayList<Course> courses;
-    public Model(ArrayList<Teacher> teachers, ArrayList<Course> courses) {
-    	this.teachers = teachers;
-    	this.courses = courses;
+    public Model() {
+    	this.teachers = new ArrayList<Teacher>();
+    	this.courses = new ArrayList<Course>();
+//    	this.assingerObject = new Assigner(teachers, courses)  ------when adding assigner
     }
            
     public ArrayList<Teacher> getTeachers() {
@@ -14,66 +15,92 @@ public class Model{
 	public ArrayList<Course> getCourses() {
 		return courses;
 	}
-
-	public ArrayList<String> getCourseNames(){
-		ArrayList<String> courseNames = new ArrayList<String>();
-		for(int i=0;i<courses.size();i++) {
-			courseNames.add(courses.get(i).getName());
+	
+	//loop through courses requirements then teacher requirements to find list of teachers suitable to teach a given course
+	public ArrayList<String> teachersMeetRequirements(String courseName){
+		ArrayList<String> suitableTeachers = new ArrayList<String>();
+		for(int i=0; i<this.courses.size();i++) { //loop through courses
+			if(this.courses.get(i).getName().equals(courseName)) { //if course name selected is in array of courses
+				for(int j=0; j<teachers.size();j++) { //loop through teachers
+					for(int m=0; m<teachers.get(j).getTrainingAttended().size();m++) { //loop through teacher training
+						if(teachers.get(j).getTrainingAttended().get(m).contains(courses.get(i).getTrainingRequired().get(courses.get(i).getTrainingRequired().size()-1))){ //if teacher has attended highest course requirement 
+						 	if(!courses.get(i).getTeachers().contains(teachers.get(j))){ 	//if courses don't already have teacher allocated then add
+						 		suitableTeachers.add(teachers.get(j).getName());    //add teacher to string of suitable teachers
+							}
+						}
+					}
+				}
+			}
 		}
-		return courseNames;
+		return suitableTeachers;
 	}
 	
-	public static void main(String [] args)	{
-    	//create teachers and courses
-    	ArrayList<String> teachingLevelEd = new ArrayList<String>();
-    	teachingLevelEd.add("Level1");  
-    	teachingLevelEd.add("Level2");  
-    	teachingLevelEd.add("Level3");  
-    	Teacher Ed = new Teacher("Ed", teachingLevelEd);    	
-    	ArrayList<String> teachingLevelWill = new ArrayList<String>();
-    	teachingLevelWill.add("Level1");  
-    	teachingLevelWill.add("Level2");  
-    	Teacher Will = new Teacher("Will", teachingLevelWill);    	
-    	ArrayList<String> teachingLevelTom = new ArrayList<String>();
-    	teachingLevelTom.add("Level1");  
-    	teachingLevelTom.add("Level2");  
-    	Teacher Thom = new Teacher("Thom", teachingLevelTom);    	
-    	ArrayList<String> teachingLevelCon = new ArrayList<String>();
-    	teachingLevelCon.add("Level1"); 
-    	Teacher Con = new Teacher("Con", teachingLevelCon);    	
-    	ArrayList<String> teachingLevelEli = new ArrayList<String>();
-    	teachingLevelEli.add("Level1"); 
-    	Teacher Eli = new Teacher("Eli", teachingLevelEli);
-    	    	    	
-    	ArrayList<String> courseRequirementsC1 = new ArrayList<String>();
-    	courseRequirementsC1.add("Level1");  	
-    	Course c1 = new Course("c1",2,courseRequirementsC1);
-    	ArrayList<String> courseRequirementsC2 = new ArrayList<String>();
-    	courseRequirementsC2.add("Level1");
-    	courseRequirementsC2.add("Level2");    	
-    	Course c2 = new Course("c2",2,courseRequirementsC2);
-    	ArrayList<String> courseRequirementsC3 = new ArrayList<String>();
-    	courseRequirementsC3.add("Level1");
-    	courseRequirementsC3.add("Level2"); 
-    	courseRequirementsC3.add("Level3"); 
-    	Course c3 = new Course("c3",3,courseRequirementsC3);
-    	
-    	//put teachers and courses into arrays
-    	ArrayList<Teacher> teachers = new ArrayList<Teacher>();
-    	teachers.add(Ed);
-    	teachers.add(Will);
-    	teachers.add(Con);
-    	teachers.add(Eli);
-    	teachers.add(Thom);
-    	ArrayList<Course> courses = new ArrayList<Course>();
-    	courses.add(c1);
-    	courses.add(c2);
-    	courses.add(c3);
-    	
-    	//add teachers and courses to model, add model to view and controller
-		Model model = new Model(teachers,courses);
-		VC viewController = new VC(model);
-		viewController.setVisible(true);
+	//find list of teachers that need training to teach a given course,
+	public ArrayList<String> teachersNeedTraining(String courseName){
+		ArrayList<String> suitableTeachers = new ArrayList<String>();
+			for(int i=0; i<courses.size();i++) { //loop through courses 
+				if(courses.get(i).getName().equals(courseName)) { //if course name selected is in array of courses
+					for(int j=0; j<teachers.size();j++) { //loop through teachers 
+						if(!courses.get(i).getTeachers().contains(teachers.get(j))) {
+							suitableTeachers.add(teachers.get(j).getName());    //add teacher to string of suitable teachers
+						}
+					}
+				}
+			}
+	return suitableTeachers;
+	}	
+
+	//find correct course and add teachers that have been assigned to course and return list of courses that still need to fulfilled
+	public ArrayList<String> assignTeachers(String courseName, String teacherName,int button) {
+		ArrayList<String> updateText = new ArrayList<String>();
+		for(int i=0;i<courses.size();i++) { //loop through courses 
+			if(courses.get(i).getName().equals(courseName)) { //find the Course selected
+				for(int j=0;j<teachers.size();j++) { //loop through teachers 
+					if(teachers.get(j).getName().equals(teacherName)) { //find teacher selected
+						if(button==0) {
+							courses.get(i).addTeacher(teachers.get(j)); //add this teacher to courses
+							updateText.add(courses.get(i).toString()); //add teachers to string of teachers that have been assigned to course
+						}else{	
+							findCourseToAttend(teachers.get(j),courses.get(i).getTrainingRequired());//get teacher and add traning 
+							updateText.add(teachers.get(j).toString()); //add training that teacher needs to attend 
+						}
+						
+					}
+				}
+			}
+		}
+		return updateText; //get courses and return so that it can be printed to text area
 	}
+	
+	//helper method to loop through array of training required for a given course and add to teacher
+	public void findCourseToAttend(Teacher t, ArrayList<String> trainingRequired) {
+		for(int i=0;i<trainingRequired.size();i++) { //loop through array
+			if(!t.getTrainingAttended().contains(trainingRequired.get(i))) { //if teaching Required is not in skillset of teacher 
+				if(!t.getTrainingToAttend().contains(trainingRequired.get(i))) { //check if courseToAttend isn't already in in list of courses to attend
+					t.addCourseToAttend(trainingRequired.get(i));   //assign training to teacher
+				}
+			}
+		}
+	}
+	
+	public String arrayListToString(ArrayList<String> str) {
+		String string = " "; //make string array same size of array list
+		for(int i=0;i<str.size();i++) { //loop through array and add to string array
+			string+=str.get(i) + "\n";
+		}		
+		return string;
+	}
+
+	public void addTeachers(ArrayList<Teacher> teachers) {
+		for(int i=0; i<teachers.size();i++) {
+			this.teachers.add(teachers.get(i));
+		}
+	}
+	public void addCourses(ArrayList<Course> courses) {
+		for(int i=0; i<courses.size();i++) {
+			this.courses.add(courses.get(i));
+		}
+	}
+		
 }
 

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Teacher {
 	private String name;
 	private ArrayList <String> trainingAttended;
-	private ArrayList <String> trainingToAttend;
+	private ArrayList <String> trainingToAttend = new ArrayList<String>();
 
 	public Teacher(String n, ArrayList <String> tc) {
 		this.name=n;
@@ -25,6 +25,14 @@ public class Teacher {
 	}
 	public ArrayList <String> getTrainingToAttend(){
 		return this.trainingToAttend;
+	}
+	
+	public String toString() {
+		String str = this.name + ":";
+		for(int i=0; i<trainingToAttend.size();i++) {
+			str += " " + trainingToAttend.get(i);
+		}
+		return str;
 	}
 	
 }
