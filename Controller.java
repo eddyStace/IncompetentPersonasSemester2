@@ -48,7 +48,9 @@ public class Controller implements ActionListener{
 		    	  }
 			  }
 			  //when courseDirector button is pressed once, then disable button so can't be pressed again
-			  viewObject.getCourseDirectorButton().setEnabled(false);			  
+			  viewObject.getCourseDirectorButton().setEnabled(false);
+			  //get list of teachers / courses from file
+			  
 			  
 		}else if(e.getSource()==viewObject.getPanel1().getList()) { 	//if course list is selected
 			teacherAssignment = false;
@@ -57,10 +59,10 @@ public class Controller implements ActionListener{
 			JComboBox cb = (JComboBox)e.getSource();
 			this.courseName = (String)cb.getSelectedItem();		
 			viewObject.getPanel2().deleteList(); //empty list to add new list of teachers
-			viewObject.getPanel2().updateList(modelObject.teachersMeetRequirements(courseName)); //find what teachers have requirements to teach a course and update list
+			viewObject.getPanel2().updateList(modelObject.assigner.teachersMeetRequirements(courseName,modelObject.getTeachers(),modelObject.getCourses())); //find what teachers have requirements to teach a course and update list
 			if(viewObject.getPanel2().getList().getItemCount()==1) { //if teacher list is empty i.e., there are no more teachers that fit requirements
 				this.teacherAssignment = true;  //set true since teachers now need to be assigned training			
-				viewObject.getPanel2().updateList(modelObject.teachersNeedTraining(courseName));
+				viewObject.getPanel2().updateList(modelObject.assigner.unassignedTeachers(courseName,modelObject.getTeachers(),modelObject.getCourses()));
 			}
 			viewObject.getAssignButton().setEnabled(false); 	//set buttons to not be enabled
 			viewObject.getAssignTrainingButton().setEnabled(false);
@@ -81,7 +83,7 @@ public class Controller implements ActionListener{
 			}else if(e.getSource()==viewObject.getAssignButton()) {
 			int button = 0;
 			//set text to the teachers that have been assigned to the course selected
-			viewObject.getText1().setText(modelObject.arrayListToString((modelObject.assignTeachers(courseName,teacherName,button))));
+			viewObject.getText1().setText(modelObject.arrayListToString((modelObject.assigner.assignTeacherToCourse(courseName,teacherName,modelObject.getTeachers(),modelObject.getCourses()))));
 			//remove teacher from list and set selection to empty element (for display)
 			viewObject.getPanel2().removeItem(teacherName); 
 			viewObject.getPanel2().setSelection();
@@ -92,11 +94,13 @@ public class Controller implements ActionListener{
 					viewObject.getPanel1().addItem(this.modelObject.getCourses().getCourses().get(i).getName());
 				}
 			}
+			
 			 			
 		}else if(e.getSource()==viewObject.getAssignTrainingButton()) {
+			System.out.println("assignTrainingButton");
 			int button = 1;
 			//set text2 to the teachers that need to undergo training
-			viewObject.getText2().setText(modelObject.arrayListToString((modelObject.assignTeachers(courseName,teacherName,button))));
+			viewObject.getText2().setText(modelObject.arrayListToString((modelObject.assigner.assingTeacherTraining(courseName,teacherName,modelObject.getTeachers(),modelObject.getCourses()))));
 			//remove teacher from list and set selection to empty element
 			viewObject.getPanel2().removeItem(teacherName); 
 			viewObject.getPanel2().setSelection();
